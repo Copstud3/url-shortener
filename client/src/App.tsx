@@ -8,7 +8,7 @@ const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 export default function App() {
   const [url, setUrl] = useState<string>("");
   const [shortUrl, setShortUrl] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false);
 
   const [copied, setCopied] = useState<boolean>(false);
   const [qrImage, setQrImage] = useState("");
@@ -17,16 +17,15 @@ export default function App() {
     if (!url) return;
 
     try {
-       setLoading(true)
-       const response = await axios.post(`${API_BASE_URL}/shorten`, {
+      setLoading(true);
+      const response = await axios.post(`${API_BASE_URL}/shorten`, {
         originalUrl: url,
       });
-       
+
       const newShortUrl = response.data.shortUrl;
       setShortUrl(newShortUrl);
       setCopied(false);
-      setLoading(false)
-      
+      setLoading(false);
 
       const qr = await QRCodeGenerator.toDataURL(newShortUrl);
 
@@ -35,7 +34,7 @@ export default function App() {
     } catch (error) {
       console.log(error);
       alert("Something went wrong");
-      setLoading(false)
+      setLoading(false);
     }
   };
 
@@ -57,12 +56,30 @@ export default function App() {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
         />
-        <button type="submit" className={`${loading ? "opacity-50" : ""} btn btn-primary w-full sm:auto`} onClick={handleShorten} disabled={loading}>{loading ? "Loading, please wait..." :"Shorten"}</button>
+        <button
+          type="submit"
+          className={`${loading ? "opacity-50 cursor-not-allowed pointer-events-auto" : ""} btn btn-primary w-full sm:auto`}
+          onClick={(e) => {
+            if (loading) {
+              e.preventDefault();
+              return;
+            }
+            handleShorten();
+          }}
+        >
+          {loading ? "Loading, please wait..." : "Shorten"}
+        </button>
       </div>
       {shortUrl && (
         <div className="flex flex-col items-center max-w-3xl w-full">
           <p className="font-medium my-2">Your short link:</p>
-          <a href={shortUrl} target="_blank" className="link link-primary break-all">{shortUrl}</a>
+          <a
+            href={shortUrl}
+            target="_blank"
+            className="link link-primary break-all"
+          >
+            {shortUrl}
+          </a>
 
           <button
             onClick={handleCopy}
@@ -72,12 +89,20 @@ export default function App() {
           </button>
 
           <div className="bg-white p-4 rounded-lg shadow mt-6">
-            <p className="mb-2 text-center font-semibold text-gray-800">Scan QR Code:</p>
+            <p className="mb-2 text-center font-semibold text-gray-800">
+              Scan QR Code:
+            </p>
 
             <QRCode value={shortUrl} size={180} />
           </div>
           {qrImage && (
-            <a className="btn btn-accent mt-3 w-full" download={`qr-code.png`} href={qrImage}>Download QR Code</a>
+            <a
+              className="btn btn-accent mt-3 w-full"
+              download={`qr-code.png`}
+              href={qrImage}
+            >
+              Download QR Code
+            </a>
           )}
         </div>
       )}
